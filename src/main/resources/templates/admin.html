@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:form="http://www.w3.org/1999/xhtml">
+<head>
+    <title>List of users</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <button type="button" class="btn btn-warning" onclick="blockUsers()">Block</button>
+        <button type="button" class="btn btn-success" onclick="unBlockUsers()">Unblock</button>
+        <button type="button" class="btn btn-danger" onclick="deleteUsers()">Delete</button>
+    </div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="toggleAllUsers"
+                           onclick="eventCheckBox()">
+                    <label class="form-check-label" for="toggleAllUsers">
+                        Select all/Remove selection
+                    </label>
+                </div>
+            </th>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Sign up date</th>
+            <th scope="col">Last sign in date</th>
+            <th scope="col">Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:each="user : ${users}">
+            <tr>
+                <td>
+                    <input class="form-check-input user-checkbox" type="checkbox" th:value="${user.id}">
+                </td>
+                <td th:text="${user.id}">...</td>
+                <td th:text="${user.username}">...</td>
+                <td th:text="${user.email}">...</td>
+                <td th:text="${user.signUp}">...</td>
+                <td th:text="${user.signIn}">...</td>
+                <td>
+                    <span th:if="${user.isBlocked}">
+                        <span class="badge text-bg-warning">Blocked</span>
+                    </span>
+                    <span th:unless="${user.isBlocked}">
+                        <span class="badge text-bg-success">Active</span>
+                    </span>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>
+<script>
+    function eventCheckBox() {
+        let checkboxes = document.getElementsByClassName("user-checkbox");
+        let toggleAllUsers = document.getElementById("toggleAllUsers");
+        for (let i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = toggleAllUsers.checked;
+        }
+    }
+
+    function deleteUsers() {
+        let checkboxes = document.getElementsByClassName("user-checkbox");
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                deleteUser(checkboxes[i].value);
+            }
+        }
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+    }
+
+    function blockUsers() {
+        let checkboxes = document.getElementsByClassName("user-checkbox");
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                blockUser(checkboxes[i].value);
+            }
+        }
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+    }
+
+    function unBlockUsers() {
+        let checkboxes = document.getElementsByClassName("user-checkbox");
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                unBlockUser(checkboxes[i].value);
+            }
+        }
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+    }
+
+    function deleteUser(userId) {
+        try {
+            const postData = new FormData();
+            postData.append("userId", userId);
+            const response = fetch('/users', {
+                method: 'DELETE',
+                body: postData
+            });
+        }catch(e){
+            //handle error
+            console.log(e)
+        }
+    }
+
+    function blockUser(userId) {
+        try {
+            const postData = new FormData();
+            postData.append("userId", userId);
+            postData.append("isBlocked", "1");
+            const response = fetch('/users', {
+                method: 'PATCH',
+                body: postData
+            });
+        }catch(e){
+            //handle error
+            console.log(e)
+        }
+    }
+
+    function unBlockUser(userId) {
+        try {
+            const postData = new FormData();
+            postData.append("userId", userId);
+            postData.append("isBlocked", "0");
+            const response = fetch('/users', {
+                method: 'PATCH',
+                body: postData
+            });
+        }catch(e){
+            //handle error
+            console.log(e)
+        }
+    }
+</script>
+</body>
+</html>
